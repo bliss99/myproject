@@ -1,10 +1,12 @@
 package com.hello.world;
 
 import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.hello.world.dao.BbsDao;
 import com.hello.world.dao.BbsVo;
 
+@Controller
 public class ViewController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ViewController.class);
@@ -33,7 +36,7 @@ public class ViewController {
 
         logger.info("totcal count" + list.size() );
 
-        return "bbs.list";
+        return "bbs/list";
     }
 
     // 게시판 상세보
@@ -46,7 +49,7 @@ public class ViewController {
         BbsVo object = this.bbsDao.getSelectOne(idx);
 
         model.addAttribute("object", object);
-        return "bbs.view";
+        return "bbs/view";
     }
 
     // 게시판 쓰기
@@ -59,7 +62,7 @@ public class ViewController {
             model.addAttribute("object", object);
         }
 
-        return "bbs.write";
+        return "bbs/write";
     }
 
     @RequestMapping(value = "/write_ok", method = RequestMethod.POST)
