@@ -25,12 +25,39 @@
 		});
 		
 		
-		$("#btn_add_link").click(function() {
-			
+		$("#btn_add_link").mousedown(function() {
+			replaceSelectedText("{{replace text}}");
+			return false;
 		});
 			
 	});
 	
+	function replaceSelectedText(replacementText) {
+	    var sel, range;
+	    if (window.getSelection) {
+	        sel = window.getSelection();
+	        var activeElement = document.activeElement;
+	        if (activeElement.nodeName == "TEXTAREA" ||
+	           (activeElement.nodeName == "INPUT" && activeElement.type.toLowerCase() == "text")) {
+	               var val = activeElement.value, start = activeElement.selectionStart, end = activeElement.selectionEnd;
+	               activeElement.value = val.slice(0, start) + replacementText + val.slice(end);
+	          //alert("in text area");
+	        } else {
+	          if (sel.rangeCount) {
+	              range = sel.getRangeAt(0);
+	              range.deleteContents();
+	              range.insertNode(document.createTextNode(replacementText));
+	          } else {
+	              sel.deleteFromDocument();
+	          }
+	        }
+	    } else if (document.selection && document.selection.createRange) {
+	        range = document.selection.createRange();
+	        range.text = replacementText;
+	    }
+	}
+
+
 	</script>
   </head>
   <body>
@@ -49,7 +76,7 @@
 	  <div>
 	  	<span>내용</span>
 	  	<a href="#" title="내용">내용</a>
-	  	<input type="button" value="내용"/>
+	  	<input type="button" value="add link" id="btn_add_link"/>
 	  	<textarea id="content" name="content" rows="40" cols="80">${object.content}</textarea>
 	  </div>
 	  <div>
