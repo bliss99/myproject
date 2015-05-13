@@ -26,7 +26,7 @@
     <c:forEach var="item" items="${list}" varStatus="status">
     <tr>
       <td>${item.idx}</td>
-      <td><a href="./${item.idx}">${item.subject}</a></td>
+      <td><a href="./${item.idx}.bn">${item.subject}</a></td>
       <td>${item.user_name}</td>
       <td>${item.reg_datetime}</td>
     </tr>
@@ -35,6 +35,6 @@
     </tbody>
 
   </table>
-  <div><a href="./write">쓰기</a></div>
+  <div><a href="./write.bn">쓰기</a></div>
   </body>
 </html>

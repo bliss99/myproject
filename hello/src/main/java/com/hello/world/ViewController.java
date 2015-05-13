@@ -28,7 +28,7 @@ public class ViewController {
     private BbsDao bbsDao;
 
     // 게시판 목록
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "/bbs", method = RequestMethod.GET)
     public String dispBbsList(Model model) {
         logger.info("display view BBS list");
         List<BbsVo> list = this.bbsDao.getSelect();

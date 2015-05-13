@@ -14,7 +14,7 @@
     }
     </script>
 
-    <form id="form" name="form" method="post" action="./delete">
+    <form id="form" name="form" method="post" action="./delete.bn">
       <input type="hidden" id="idx" name="idx" value="${object.idx}" />
     </form>
     <p>${object.subject}</p>
@@ -30,8 +30,8 @@
 
     <div>
       <button type="button" onclick="del()">삭제</button>
-      <a href="./write?idx=${object.idx}">수정</a>
-      <a href="./">목록</a>
+      <a href="./write.bn?idx=${object.idx}">수정</a>
+      <a href="./bbs.bn">목록</a>
     </div>
   </body>
 </html>
