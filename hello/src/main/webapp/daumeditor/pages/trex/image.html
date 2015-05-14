@@ -1,26 +1,78 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Daum에디터 - 이미지 첨부</title> 
-<script src="../../js/popup.js" type="text/javascript" charset="utf-8"></script>
-<link rel="stylesheet" href="../../css/popup.css" type="text/css"  charset="utf-8"/>
+<link rel="stylesheet" href="/daumeditor/css/popup.css" type="text/css"/>
+<script src="/daumeditor/js/popup.js" type="text/javascript"></script>
+
+
 <script type="text/javascript">
 // <![CDATA[
+	var fileExt = new Array (".jpg", ".jpeg", ".gif");
+	var base_url = "";
+	
+	var _mockdata = "";
+	var _filename = "";
+	var fileUrl = "";
+	var _upload_path = "";
+	
+	var _check = false;
+	
+	function onPreview() {
+	  var src = document.getElementById("src");
+	  var url = src.value;
+	  if (!url) {
+		alert("URL 을 입력하세요!!");
+		src.focus();
+		return false;
+	  }
+	  
+	  window.ipreview.location.replace(url.replace("..", ""));
+
+	  return false;
+	}
 	
 	function done() {
-		if (typeof(execAttach) == 'undefined') { //Virtual Function
-	        return;
-	    }
+	
+		if(!_check){
+			alert("첨부할 이미지를 선택하세요.");
+			return;
+		}
+	
+		if(!checkWidth()){
+			return;
+		}
 		
-		var _mockdata = {
-			'imageurl': 'http://cfile284.uf.daum.net/image/116E89154AA4F4E2838948',
-			'filename': 'editor_bi.gif',
+		var desc = document.getElementById('detail');
+		
+		if(desc.value == ""){
+			alert("이미지 설명을 넣으세요.");
+			return;
+		}
+		
+		var pattern = /^[a-zA-Z0-9가-힣\s]+$/g;
+		if(!pattern.test(desc.value)){
+			alert("이미지 설명에 숫자, 영문, 한글만 입력하세요.");
+			return;
+		}
+
+		var widthObj = document.getElementById('width');
+		var heightObj = document.getElementById('height');
+		var sizeOption = "\"width=\"" +widthObj.value +"\"height=\""+heightObj.value;
+		var altOption = "\"alt=\"" +desc.value;
+		var titleOption = "\"title=\"" +desc.value;
+		var paddingOption = "\"style=\"padding-left:4px;padding-right:4px";
+		
+		_mockdata = {
+			'imageurl': fileUrl + sizeOption + altOption + titleOption + paddingOption,
+			'filename': _filename,
 			'filesize': 640,
 			'imagealign': 'C',
-			'originalurl': 'http://cfile284.uf.daum.net/original/116E89154AA4F4E2838948',
-			'thumburl': 'http://cfile284.uf.daum.net/P150x100/116E89154AA4F4E2838948'
+			'originalurl': _upload_path,
+			'thumburl': _upload_path
 		};
+		
 		execAttach(_mockdata);
 		closeWindow();
 	}
@@ -35,30 +87,199 @@
 	    var _attacher = getAttacher('image', _opener);
 	    registerAction(_attacher);
 	}
+	
+	function onUpload() {
+	try {
+
+		var file_name = document.getElementById ("file_name").value;
+		var file_size = document.getElementById ("max_file_size").value;
+		
+		var extFile = file_name.split("\\");
+		var ImgInfo = extFile[extFile.length-1];
+		//var ext = ImgInfo.split(".");
+		var ext = ImgInfo.substring(ImgInfo.lastIndexOf(".")+1, ImgInfo.length);
+		
+		if (ext.toUpperCase() == "JPG" || ext.toUpperCase() == "GIF" || ext.toUpperCase() == "JPEG" ) {
+		} else {
+			alert ('이미지 파일이 아닙니다.');
+			return false;
+		}
+		
+		
+		var frame = document.getElementById ("upload_frame");
+		var frm = document.myform;
+		frm.action = base_url + "/jsp/fileupload/image_upload_action.jsp?cmd=upload&max_file_size=" + frm.max_file_size.value;
+		frm.submit();
+		}catch(e) {alert (e);}
+		return false;
+	}
+	
+	function UpLoadImageOk (filename, orginal_width, orginal_height, type, upload_path, fileSize) {
+	
+		var frm = document.myform;
+	
+	    var file_name = document.getElementById ("file_name").value;
+		var file_size = document.getElementById ("max_file_size").value;
+	    if ((file_size * 1024) < fileSize) {
+			alert ('이미지가 ' + file_size + ' KByte 를 넘을 수 없습니다.');
+			frm.file_name.value = "";
+			frm.url_file.value = "";
+			return false;
+		}
+		
+		var src = document.getElementById("src");
+		src.value = base_url + "/upload/temp/" + filename;
+		if (src.value == '') {
+			alert("URL을 입력하세요!!");
+			src.focus();
+			return false;
+		}
+	
+		// 이미지 세팅
+		var obj = document.getElementById('orginal_width');
+		obj.value = orginal_width;
+		var obj = document.getElementById('orginal_height');
+		obj.value = orginal_height;
+		
+		var widthObj = document.getElementById('width');
+		widthObj.value = orginal_width;
+		var heightObj = document.getElementById('height');
+		heightObj.value = orginal_height;
+	    
+		if (orginal_width > 600) {
+			widthObj.value = 600;
+			heightObj.value = parseInt((widthObj.value/orginal_width)*orginal_height);
+		}		    
+		
+		// 다음 이미지 data 세팅
+		fileUrl = upload_path + "/" + filename;
+		_filename = filename;
+		_upload_path = upload_path;
+		
+		_check = true;
+		
+		window.ipreview.location.replace(src.value);
+	}
+	
+	function checkWidth(){
+	
+		var widthObj = document.getElementById('width');
+		if(widthObj.value > 600) {
+			alert('이미지 가로크기는 600픽셀 이상으로 설정할 수 없습니다.\n\n 600픽셀 이상으로 설정하면 홈페이지 디자인이 깨져 버립니다.');
+			return false;
+		}
+		return true;
+	}
+	
+	function checkConstrains(changed, size) 
+	{
+		var constrains = document.getElementById('constrain_prop');
+
+		var widthObj = document.getElementById('width');
+		var heightObj = document.getElementById('height');
+		var width = typeof(size) != 'undefined' ? size : parseInt(widthObj.value);
+		var height = typeof(size) != 'undefined' ? size : parseInt(heightObj.value);
+		
+		if (width > 600) {
+			alert('이미지 가로크기는 600픽셀 이상으로 설정할 수 없습니다.\n\n 600픽셀 이상으로 설정하면 홈페이지 디자인이 깨져 버립니다.');
+		}
+
+		if(constrains.checked) 
+		{
+			var obj = document.getElementById('orginal_width');
+			var orginal_width = parseInt(obj.value);
+			var obj = document.getElementById('orginal_height');
+			var orginal_height = parseInt(obj.value);
+
+			if(orginal_width > 0 && orginal_height > 0) 
+			{
+				if(changed == 'width' && width > 0) {
+					heightObj.value = parseInt((width/orginal_width)*orginal_height);
+				}
+
+				if(changed == 'height' && height > 0) {
+					widthObj.value = parseInt((height/orginal_height)*orginal_width);
+				}
+			}			
+		}
+	}
+	
 // ]]>
 </script>
+
+
+<style type="text/css"> 
+ 
+	.p_wrap {text-align:left;width:600px;}
+	.p_top { background-color:#333; padding:10px;  text-align:left;width:100%;border-bottom:2px solid #D7D7D7; color:#fff;}
+	.p_btn { background-color:#b8cace;  margin:15px 0; padding:8px;  text-align:center; width:100%;border-bottom:2px solid #D7D7D7; color:#fff;}
+	.p_photo01 {margin:0 auto;text-align:center; width:450px; height:30px;}
+	.p_photo01 ul{ float:left; margin:10px 3px 0 0; text-align:center;}
+	.text_field {width:350px; height:18px;padding-top:1px;border:1px solid #b6ad9b;} /* standards mode 와 height 차이 */
+	.text_field2 {width:50px; height:18px;padding-top:1px;border:1px solid #b6ad9b;} /* standards mode 와 height 차이 */
+	.text_field3 {width:170px; height:18px;padding-top:1px;border:1px solid #b6ad9b;} /* standards mode 와 height 차이 */
+	.img_list {width:574px;  background-color:#e0e0e0; padding:10px; border:1px solid #C2C2C2; overflow:hidden;}
+	.img_list li {list-style:none; clear:both; color:#2D2C2D; font:12px/1.5 돋움, Dotum; overflow:hidden;}
+	.img_list li iframe {display:inline; float:left; margin:0 10px 0 0;border:1px solid #b6ad9b;}
+	.img_list li p {margin:20px;}
+
+</style>
+
 </head>
+
+
 <body onload="initUploader();">
+<form name="myform" action="" target='upload_frame' method="post" enctype='multipart/form-data' style="margin:0px;">
 <div class="wrapper">
 	<div class="header">
 		<h1>사진 첨부</h1>
 	</div>	
 	<div class="body">
 		<dl class="alert">
-		    <dt>사진 첨부 확인</dt>
+		    <dt>이미지를 찾으신 후, 미리보기가 실행될 때까지 잠시 기다려주세요.</dt>
 		    <dd>
-		    	확인을 누르시면 임시 데이터가 사진첨부 됩니다.<br /> 
-				인터페이스는 소스를 확인해주세요.
+			<div class="p_photo01 cb">
+				<ul>
+					<input type="file" name="file_name" id="file_name" size="80" onchange="return onUpload();" style="width:100%; height:80;"/>
+					<input type='hidden' name='max_file_size' id="max_file_size" value='50000' title='이미지의 최대 사이즈'/>
+					<input name="src" type="hidden" id="src" value="" onchange="getImageData();" size="40" class="text_field">
+				</ul>
+			</div>
+		    <div style="margin-top:20px;">
+				<ul class="img_list">
+					<li class="fl">
+					<iframe name="ipreview" id="ipreview" frameborder="0" style="border : 1px solid gray;" height="230" width="300" src=""></iframe>
+					<!-- 
+					<img src="../../images/photo.gif" width="300" height="230" alt="미리보기이미지">
+					 -->
+					<strong><font color="blue">넓이 (단위:px)</font></strong>&nbsp;&nbsp;<input type="checkbox" id="constrain_prop" checked="checked" class="checkbox" /> 비율고정<br>
+					<input name="width" type="text" id="width" value="" maxlength="3" onkeyup="javascript:checkConstrains('width');" class="text_field2"> *
+					<input name="height" type="text" id="height" value="" maxlength="3" onkeyup="javascript:checkConstrains('height');" class="text_field2"></input></br>
+					<input type="hidden" id="orginal_width" />
+				    <input type="hidden" id="orginal_height" />
+				    <strong><font color="blue">이미지 설명</font></strong></br>
+				    <input name="detail" type="text" id="detail" value="" onkeyup="javascript:checkConstrains('width');" class="text_field3"></br>
+				        ※ 이미지 설명에 숫자, 영문, 한글만 입력하세요.</br></br>
+					※<span class="blue f11"> 다음과 같은 파일을 업로드 하실 수 있습니다. (jpeg .jpg .gif)</span> <br><br>
+					※<span class="blue f11"> 1M 이상의 사진은 업로드 하실 수 없습니다.</span>
+					</li>
+				</ul>
+			</div>
 			</dd>
 		</dl>
 	</div>
 	<div class="footer">
-		<p><a href="#" onclick="closeWindow();" title="닫기" class="close">닫기</a></p>
 		<ul>
 			<li class="submit"><a href="#" onclick="done();" title="등록" class="btnlink">등록</a> </li>
 			<li class="cancel"><a href="#" onclick="closeWindow();" title="취소" class="btnlink">취소</a></li>
 		</ul>
 	</div>
 </div>
+
+</form>
+
+<iframe name='upload_frame' style='border:0px; width:0px; height:0px;'></iframe>
+
 </body>
+
 </html>

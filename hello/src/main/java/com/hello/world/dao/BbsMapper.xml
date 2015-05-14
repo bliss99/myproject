@@ -18,7 +18,7 @@
         SELECT  * FROM bbs WHERE idx = #{idx}
     </select>
 
-    <insert id="insert">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="idx">
          INSERT INTO bbs ( user_name, subject, content, reg_datetime ) VALUES (
                 #{user_name}
               , #{subject}

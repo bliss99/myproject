@@ -6,96 +6,123 @@
     <meta charset="utf-8">
     <title>스프링프레임워크 게시판</title>
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="/js/field-selection.js"></script>
     <script type="text/javascript">
 	
-    var brace = "";
+    var prove = 1;
 	$(function(){	
 		
-		$("#content").keydown(function(e) {
-		    if (e.keyCode == 221){
-		    	if(brace==""){
-		    		brace = "}";
-		    	}
-		    	else{
-		    		
-		    	}
-		    }else{
-		    	brace = "";
-		    }
-		});
-		
-		
-		$("#btn_add_link").mousedown(function() {
-			replaceSelectedText("{{replace text}}");
-			return false;
+		$("#btn_add_prove").mousedown(function() {
+			var sel_txt = $("#content").fieldSelection().text;
+			if(sel_txt == ""){
+				sel_txt = "논증" +prove;
+			}
+			$("#content").fieldSelection("{"+prove+"}"+sel_txt+"{"+prove+"}");
+			$("#prove_container").append('<div><div id="prove'+prove+'" draggable="true" ondragstart="drag(event)">논증'+prove+'</div><iframe id="frm"'+prove+' src="/daumeditor/editor.html" width="500" height="300" style="border:1px;"></iframe></div>');
+			
+			prove++;
 		});
 			
 	});
+
 	
-	function replaceSelectedText(replacementText) {
-	    var sel, range;
-	    if (window.getSelection) {
-	        sel = window.getSelection();
-	        var activeElement = document.activeElement;
-	        if (activeElement.nodeName == "TEXTAREA" ||
-	           (activeElement.nodeName == "INPUT" && activeElement.type.toLowerCase() == "text")) {
-	               var val = activeElement.value, start = activeElement.selectionStart, end = activeElement.selectionEnd;
-	               activeElement.value = val.slice(0, start) + replacementText + val.slice(end);
-	          //alert("in text area");
-	        } else {
-	          if (sel.rangeCount) {
-	              range = sel.getRangeAt(0);
-	              range.deleteContents();
-	              range.insertNode(document.createTextNode(replacementText));
-	          } else {
-	              sel.deleteFromDocument();
-	          }
-	        }
-	    } else if (document.selection && document.selection.createRange) {
-	        range = document.selection.createRange();
-	        range.text = replacementText;
-	    }
+	function allowDrop(ev) {
+	    ev.preventDefault();
+	    
 	}
 
+	function drag(ev) {
+	    ev.dataTransfer.setData("text", ev.target.id);
+	}
 
+	function drop(ev) {
+	    ev.preventDefault();
+	    var data = ev.dataTransfer.getData("text");
+	    data = data.replace("prove", "");
+	    $("#content").fieldSelection("{"+data+"}논증"+data+"{"+data+"}");
+	    //ev.target.appendChild(document.getElementById(data));
+	}
+
+	function fnSave(){
+		
+		$.ajax({
+			url: "/save.bn",
+			type : "POST",
+			dataType : "json",
+			processData: false,
+			data: $("#form").serialize(),
+			success : function(data){
+				fnSaveProves(data);
+			},
+			error : function (jqXHR, textStatus, errorThrown) {
+				alert ("Error occurred.[" + errorThrown + "]"+jqXHR.responseText );
+			},
+			timeout : function () {
+				alert ("Timeout");
+			}
+		});
+	}
+	
+	function fnSaveProves(data){
+		
+		$("#idx").val(data);
+		
+		$("iframe[id^=frm]").each(function(i){
+			$(this).contents().find('input#idx').val(data);
+			$(this)[0].contentWindow.saveContent();
+		});
+		
+		
+	}
+	
 	</script>
   </head>
   <body>
   <h1>${message}</h1>
-  <form id="form" method="post" action="./write_ok.bn">
+  <form id="form" method="post">
+  
+  <table>
+  	<colgroup>
+  		<col width="50%"/>
+  		<col width="50%"/>
+  	</colgroup>
+  	<tbody>
+  		<tr>
+  			<td colspan="2">
+				<input type="text" name="idx" id="idx" value="${object.idx}" />
+				<div>
+					<span>제목</span>
+					<input type="text" id="subject" name="subject" value="${object.subject}" />
+				</div>
+				<div>
+					<span>작성자</span>
+					<input type="text" id="user_name" name="user_name" value="${object.user_name}" />
+				</div>
+  			</td>
+  		</tr>
+  		<tr>
+  			<td>
+	  			<div>
+			  		<span>내용</span>
+				  	<textarea id="content" name="content" rows="30" cols="50" ondrop="drop(event)" ondragover="allowDrop(event)">
+				  	${object.content}
+				  	</textarea>
+		  		</div>
+		  	</td>
+		  	<td>
+		  		<input type="button" value="논증추가" id="btn_add_prove"/>
+		  		<div id="prove_container" style="width:100%;height:500px;overflow-y:scroll;" >
+  				</div>
+		  	</td>
+  		</tr>
+  	</tbody>
+  </table>
   <div>
-	  <input type="hidden" name="idx" id="idx" value="${object.idx}" />
-	  <div>
-	  	<span>제목</span>
-	  	<input type="text" id="subject" name="subject" value="${object.subject}" />
-	  </div>
-	  <div>
-	  	<span>작성자</span>
-	  	<input type="text" id="user_name" name="user_name" value="${object.user_name}" />
-	  </div>
-	  <div>
-	  	<span>내용</span>
-	  	<a href="#" title="내용">내용</a>
-	  	<input type="button" value="add link" id="btn_add_link"/>
-	  	<textarea id="content" name="content" rows="40" cols="80">${object.content}</textarea>
-	  </div>
-	  <div>
-	  	<select multiple="multiple" style="width:100px;height:200px;">
-	  	</select>
-	  </div>
-  </div>
-  <div>
-  	<input type="submit" value="save" />
+  	<input type="button" value="save" onClick="fnSave()"/>
   	<a href="./bbs.bn">목록</a>
   </div>
   
-  <div style="display:;">
-   	<iframe src="/daumeditor/editor.html" width="500" height="500" style="border:1px;">
-<!-- 
- 	<iframe src="/ckeditor/samples/index.html" width="500" height="500" style="border:1px;">
- -->
-  	</iframe>
-  </div>
+ 
   
   </form>
   </body>

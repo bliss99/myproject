@@ -71,5 +71,5 @@
         }
     }
 
-    EditorJSLoader.ready(addEditorEnvIndicator);
+   // EditorJSLoader.ready(addEditorEnvIndicator);
 })();

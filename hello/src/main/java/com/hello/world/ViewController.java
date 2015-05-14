@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hello.world.dao.BbsDao;
@@ -65,24 +66,36 @@ public class ViewController {
         return "bbs/write";
     }
 
-    @RequestMapping(value = "/write_ok", method = RequestMethod.POST)
-    public String procBbsWrite(@ModelAttribute("bbsVo") BbsVo bbsVo, RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public @ResponseBody String procBbsSave(@ModelAttribute("bbsVo") BbsVo bbsVo, RedirectAttributes redirectAttributes) {
         Integer idx = bbsVo.getIdx();
 
         if (idx == null || idx == 0) {
             this.bbsDao.insert(bbsVo);
+            idx = bbsVo.getIdx();
             redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
-            return "redirect:/";
-        } else {
-            this.bbsDao.update(bbsVo);
-            redirectAttributes.addFlashAttribute("message", "수정되었습니다.");
-            return "redirect:/write?idx=" + idx;
         }
+        return idx+"";
+    }
+    
+    @RequestMapping(value = "/write_ok", method = RequestMethod.POST)
+    public String procBbsWrite(@ModelAttribute("bbsVo") BbsVo bbsVo, RedirectAttributes redirectAttributes) {
+    	Integer idx = bbsVo.getIdx();
+    	
+    	if (idx == null || idx == 0) {
+    		this.bbsDao.insert(bbsVo);
+    		redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
+    		return "redirect:/bbs.bn";
+    	} else {
+    		this.bbsDao.update(bbsVo);
+    		redirectAttributes.addFlashAttribute("message", "수정되었습니다.");
+    		return "redirect:/write.bn?idx=" + idx;
+    	}
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public String procBbsDelete(@RequestParam(value = "idx", required = false) int idx) {
         this.bbsDao.delete(idx);
-        return "redirect:/";
+        return "redirect:/bbs.bn";
     }
 }
