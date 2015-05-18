@@ -18,15 +18,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hello.world.dao.BbsDao;
 import com.hello.world.dao.BbsVo;
+import com.hello.world.dao.ProveDao;
+import com.hello.world.dao.ProveVo;
 
 @Controller
 public class ViewController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ViewController.class);
 
-	// Resource 어노테이션을 이용하여 BbsDao 선언.
     @Resource(name = "bbsDao")
     private BbsDao bbsDao;
+    
+    @Resource(name = "proveDao")
+    private ProveDao proveDao;
 
     // 게시판 목록
     @RequestMapping(value = "/bbs", method = RequestMethod.GET)
@@ -76,6 +80,20 @@ public class ViewController {
             redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
         }
         return idx+"";
+    }
+    
+    @RequestMapping(value = "/saveProveTemp", method = RequestMethod.POST)
+    public @ResponseBody String saveProveTemp(@ModelAttribute("proveVo") ProveVo proveVo, RedirectAttributes redirectAttributes) {
+   		this.proveDao.insert(proveVo);
+    	return proveVo.getSeq()+"";
+    }
+    
+    @RequestMapping(value = "/getProve")
+    public @ResponseBody ProveVo getProve(@RequestParam(value = "seq", required = false) int seq)  throws Exception{
+        logger.info("display prove seq = {}", seq);
+        ProveVo object = this.proveDao.getSelectOne(seq);
+
+        return object;
     }
     
     @RequestMapping(value = "/write_ok", method = RequestMethod.POST)

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hello.world.dao.ProveMapper">
+
+    <resultMap id="proveMap" type="com.hello.world.dao.ProveVo">
+        <id     property="seq"    column="seq" />
+        <id     property="idx"    column="idx" />
+        <result property="content"       column="content" />
+    </resultMap>
+
+    <select id="select" resultMap="proveMap">
+        SELECT  * FROM prove
+    </select>
+
+    <select id="selectOne" resultMap="proveMap">
+        SELECT  seq, ifnull(idx, 0) as idx, content FROM prove WHERE seq = #{seq}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="seq">
+         INSERT INTO prove (content ) VALUES (
+              #{content}
+         )
+    </insert>
+
+    <update id="update">
+         UPDATE prove SET
+              content = #{content}
+         WHERE seq = #{seq} LIMIT 1
+    </update>
+
+    <delete id="delete">
+         DELETE FROM prove WHERE seq = #{seq}
+    </delete>
+
+</mapper>
