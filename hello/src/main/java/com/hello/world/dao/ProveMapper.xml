@@ -5,6 +5,7 @@
     <resultMap id="proveMap" type="com.hello.world.dao.ProveVo">
         <id     property="seq"    column="seq" />
         <id     property="idx"    column="idx" />
+        <result property="num"    column="num" />
         <result property="content"       column="content" />
     </resultMap>
 
@@ -14,6 +15,10 @@
 
     <select id="selectOne" resultMap="proveMap">
         SELECT  seq, ifnull(idx, 0) as idx, content FROM prove WHERE seq = #{seq}
+    </select>
+    
+    <select id="selectOneByNum" resultMap="proveMap">
+        SELECT  seq, ifnull(idx, 0) as idx, content FROM prove WHERE idx = #{idx} and num = #{num}
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="seq">
@@ -25,6 +30,13 @@
     <update id="update">
          UPDATE prove SET
               content = #{content}
+         WHERE seq = #{seq} LIMIT 1
+    </update>
+    
+    <update id="updateIdx">
+         UPDATE prove SET
+              idx = #{idx}
+             ,num = #{num}
          WHERE seq = #{seq} LIMIT 1
     </update>
 

@@ -593,6 +593,10 @@
         }
         return true;
 	}
+	 
+	function fnEditorInit(){
+		Editor.modify({content:" ", attachments:[]});
+	}
 </script>
 <div><button onclick='saveContent()'>SAMPLE - submit contents</button></div>
 <!-- End: Saving Contents -->

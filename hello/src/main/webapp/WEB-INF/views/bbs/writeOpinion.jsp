@@ -180,12 +180,49 @@
 		
 	}
 	
+	
+	function fnOpenProve(num){
+    	var params = "idx="+$("#other_idx").val()+"&num="+num;
+		console.log(params);
+		$.ajax({
+			url: "/getProve2.bn",
+			type : "POST",
+			dataType : "json",
+			processData: false,
+			data: params,
+			success : function(response){
+				$("#prove_content").html(response.content);
+				$("#prove_content").show();
+			},
+			error : function (jqXHR, textStatus, errorThrown) {
+				console.log ("Error occurred.[" + errorThrown + "]"+jqXHR.responseText );
+			},
+			timeout : function () {
+				alert ("Timeout");
+			}
+		});
+    }
+	
 	</script>
   </head>
   <body>
-  <h1>${message}</h1>
-  <form id="form" method="post">
+  <div style="float: left;">
+   <p>${object.subject}</p>
+
+    <div style="width:1000px;">
+    <pre>
+    ${other.content}
+    </pre>
+    </div>
+
+    <div>
+    <p>작성자 : ${other.user_name}</p>
+  	</div>
+  </div>
+  <div id="prove_content"></div>
   
+  <form id="form" method="post">
+ 
   <table style="width:1000px;">
   	<colgroup>
   		<col width="50%"/>
@@ -195,6 +232,8 @@
   		<tr>
   			<td colspan="2">
 				<input type="hidden" name="idx" id="idx" value="${object.idx}" />
+				<input type="hidden" name="relation_idx" id="relation_idx" value="${other.idx}" />
+				<input type="hidden" name="opinion" id="opinion" value="${opinion}" />
 				<div>
 					<span>제  목</span>
 					<input type="text" id="subject" name="subject" value="${object.subject}" />

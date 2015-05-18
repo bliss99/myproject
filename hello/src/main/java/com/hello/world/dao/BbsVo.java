@@ -2,10 +2,12 @@ package com.hello.world.dao;
 
 public class BbsVo {
 	private Integer idx;
-    private String user_name;
-    private String subject;
-    private String content;
-    private String reg_datetime;
+	private String user_name;
+	private String subject;
+	private String content;
+	private String reg_datetime;
+	private Integer relation_idx;
+	private String opinion;
 
     public Integer getIdx() {
         return idx;
@@ -37,4 +39,17 @@ public class BbsVo {
     public void setReg_datetime(String reg_datetime) {
         this.reg_datetime = reg_datetime;
     }
+	public Integer getRelation_idx() {
+		return relation_idx;
+	}
+	public void setRelation_idx(Integer relation_idx) {
+		this.relation_idx = relation_idx;
+	}
+	public String getOpinion() {
+		return opinion;
+	}
+	public void setOpinion(String opinion) {
+		this.opinion = opinion;
+	}
+    
 }

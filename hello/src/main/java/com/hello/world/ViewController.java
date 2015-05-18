@@ -1,8 +1,12 @@
 package com.hello.world;
 
+import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +57,17 @@ public class ViewController {
         logger.info("display view BBS view idx = {}", idx);
         BbsVo object = this.bbsDao.getSelectOne(idx);
 
+        String cont = object.getContent();
+        
+        //String s = "(?i)\\b((?:https?://|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:\'\".,<>?«»“”‘’]))";
+
+        String str = "\\{{2}([0-9])\\}";
+        Pattern patt = Pattern.compile(str);
+        Matcher matcher = patt.matcher(cont);
+        cont = matcher.replaceAll("<a href=\"javascript:fnOpenProve($1)\">");
+        
+        object.setContent(cont.replaceAll("\\{[0-9]\\}{2}", "</a>"));
+        
         model.addAttribute("object", object);
         return "bbs/view";
     }
@@ -69,16 +84,71 @@ public class ViewController {
 
         return "bbs/write";
     }
+    
+    // 찬성
+    @RequestMapping(value = "/writeAgree", method = RequestMethod.GET)
+    public String dispBbsWriteAgree(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
+    	if (idx > 0) {
+    		BbsVo object = this.bbsDao.getSelectOne(idx);
+    		
+    		String cont = object.getContent();
+    		String str = "\\{{2}([0-9])\\}";
+	        Pattern patt = Pattern.compile(str);
+	        Matcher matcher = patt.matcher(cont);
+	        cont = matcher.replaceAll("<a href=\"javascript:fnOpenProve($1)\">");
+	        object.setContent(cont.replaceAll("\\{[0-9]\\}{2}", "</a>"));
+	        
+    		model.addAttribute("other", object);
+    	}
+    	model.addAttribute("opinion", "1");
+    	
+    	return "bbs/writeOpinion";
+    }
+    
+    // 반대
+    @RequestMapping(value = "/writeOppose", method = RequestMethod.GET)
+    public String dispBbsWriteOppose(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
+    	if (idx > 0) {
+    		BbsVo object = this.bbsDao.getSelectOne(idx);
+    		
+    		String cont = object.getContent();
+    		String str = "\\{{2}([0-9])\\}";
+	        Pattern patt = Pattern.compile(str);
+	        Matcher matcher = patt.matcher(cont);
+	        cont = matcher.replaceAll("<a href=\"javascript:fnOpenProve($1)\">");
+	        object.setContent(cont.replaceAll("\\{[0-9]\\}{2}", "</a>"));
+	        
+    		model.addAttribute("other", object);
+    	}
+    	model.addAttribute("opinion", "2");
+    	
+    	return "bbs/writeOpinion";
+    }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public @ResponseBody String procBbsSave(@ModelAttribute("bbsVo") BbsVo bbsVo, RedirectAttributes redirectAttributes) {
+    public @ResponseBody String procBbsSave(@ModelAttribute("bbsVo") BbsVo bbsVo, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         Integer idx = bbsVo.getIdx();
 
-        if (idx == null || idx == 0) {
-            this.bbsDao.insert(bbsVo);
-            idx = bbsVo.getIdx();
-            redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
+        this.bbsDao.insert(bbsVo);
+        idx = bbsVo.getIdx();
+        
+        Enumeration<String> en = request.getParameterNames();
+        
+        ProveVo proveVo = new ProveVo();
+        proveVo.setIdx(idx);
+        while(en.hasMoreElements()){
+        	String nm = en.nextElement();
+        	if(nm.indexOf("prove_seq")>-1){
+        		String prove_seq = request.getParameter(nm);
+        		String num = nm.replaceAll("prove_seq", "");
+        		proveVo.setSeq(Integer.parseInt(prove_seq));
+        		proveVo.setNum(Integer.parseInt(num));
+        		proveDao.updateIdx(proveVo);
+        	}
         }
+        
+        redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
+
         return idx+"";
     }
     
@@ -94,6 +164,13 @@ public class ViewController {
         ProveVo object = this.proveDao.getSelectOne(seq);
 
         return object;
+    }
+    
+    @RequestMapping(value = "/getProve2")
+    public @ResponseBody ProveVo getProve2(@ModelAttribute("proveVo") ProveVo proveVo)  throws Exception{
+    	ProveVo object = this.proveDao.getSelectOneByNum(proveVo);
+    	
+    	return object;
     }
     
     @RequestMapping(value = "/write_ok", method = RequestMethod.POST)

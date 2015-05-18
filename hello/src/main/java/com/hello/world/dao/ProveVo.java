@@ -4,6 +4,8 @@ public class ProveVo {
 	private Integer seq;
 	private Integer idx;
     private String content;
+    private Integer num;
+    
 	public Integer getSeq() {
 		return seq;
 	}
@@ -21,6 +23,12 @@ public class ProveVo {
 	}
 	public void setContent(String content) {
 		this.content = content;
+	}
+	public Integer getNum() {
+		return num;
+	}
+	public void setNum(Integer num) {
+		this.num = num;
 	}
     
     
