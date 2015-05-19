@@ -182,7 +182,7 @@
 	
 	
 	function fnOpenProve(num){
-    	var params = "idx="+$("#other_idx").val()+"&num="+num;
+    	var params = "idx="+$("#relation_idx").val()+"&num="+num;
 		console.log(params);
 		$.ajax({
 			url: "/getProve2.bn",

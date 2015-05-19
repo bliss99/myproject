@@ -18,13 +18,15 @@
 	   });
     
 	   function circleOpinion(){
-		   var arr = new Array();
-		   arr[0] = "의견1";
-		   arr[1] = "의견2";
-		   arr[2] = "의견3";
-		   arr[3] = "의견4";
+		   var arr = {	opinion:[{title:"의견1",opinion:[{title:"부의견1"},{title:"부의견1-1"}]}
+		   						,{title:"의견2",opinion:[{title:"부의견2"}]}
+		   						,{title:"의견3",opinion:[{title:"부의견3"}]}
+		   						,{title:"의견4",opinion:[{title:"부의견4"}]}
+				            ]
+		   };
 		   
-		   drawPoints(300,300,2,100, Math.PI, arr);
+		   
+		   drawPoints(300,300,200, Math.PI, arr);
 	   }
 	   
 	   function drawStar(cx,cy,spikes,outerRadius,innerRadius, degree){
@@ -107,11 +109,11 @@
 			ctx.closePath();
 		}
 	   
-	   function drawPoints(cx,cy,spikes,radius, degree, arr_opinions){
+	   function drawPoints(cx,cy,radius, degree, data){
 		   	var canvas=document.getElementById("canvas");
 			var ctx=canvas.getContext("2d");
 			
-			spikes = arr_opinions.length;
+			var spikes = data.opinion.length;
 			
 			var rot=degree;
 			var x=cx;
@@ -126,12 +128,15 @@
 			ctx.beginPath();
 			opinionCircle(ctx,cx,cy, 20);
 //			ctx.moveTo(cx,cy-outerRadius);
-			for(i=0;i<spikes;i++){
+			for(var i=0;i<spikes;i++){
 				x=cx+Math.cos(rot)*radius;
 				y=cy+Math.sin(rot)*radius;
 				ctx.moveTo(x,y);
 				opinionCircle(ctx, x,y,3);
-				ctx.fillText(arr_opinions[i], x+5,y+10);
+				ctx.fillText(data.opinion[i].title, x+5,y+10);
+				if(data.opinion[i].hasOwnProperty("opinion")){
+					drawArch(x,y,50,Math.PI,data.opinion[i]);
+				}
 			//	console.log(Math.cos(rot) +" , "+Math.sin(rot)+" --out--> "+Math.cos(rot)*outerRadius+" , " +Math.sin(rot)*outerRadius);
 				rot+=step
 				
@@ -159,6 +164,37 @@
 			context.strokeStyle = 'yellow';
 			context.stroke();
 		}
+		
+		
+		function drawArch(cx,cy,radius, degree, data){
+		   	var canvas=document.getElementById("canvas");
+			var ctx=canvas.getContext("2d");
+			var spikes = data.opinion.length;
+			
+			var rot=degree;
+			var x=cx;
+			var y=cy;
+			var ox;
+			var oy;
+			var step=Math.PI/spikes;
+			
+			circle(ctx,cx,cy, radius);
+			
+			ctx.strokeStyle="red";
+			ctx.beginPath();
+//			ctx.moveTo(cx,cy-outerRadius);
+			for(var i=0;i<spikes;i++){
+				x=cx+Math.cos(rot)*radius;
+				y=cy+Math.sin(rot)*radius;
+				ctx.moveTo(x,y);
+				opinionCircle(ctx, x,y,3);
+				ctx.fillText(data.opinion[i].title, x+5,y+10);
+				rot+=step
+				
+			}
+		}
+		
+		
 	</script>
   </head>
   <body>
