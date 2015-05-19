@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="select" resultMap="bbsMap">
-        SELECT  * FROM bbs
+        SELECT  * FROM bbs WHERE RELATION_IDX IS NULL
     </select>
 
     <select id="selectOne" resultMap="bbsMap">
