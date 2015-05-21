@@ -8,6 +8,7 @@ public class BbsVo {
 	private String reg_datetime;
 	private Integer relation_idx;
 	private String opinion;
+	private String type_cd;
 
     public Integer getIdx() {
         return idx;
@@ -50,6 +51,12 @@ public class BbsVo {
 	}
 	public void setOpinion(String opinion) {
 		this.opinion = opinion;
+	}
+	public String getType_cd() {
+		return type_cd;
+	}
+	public void setType_cd(String type_cd) {
+		this.type_cd = type_cd;
 	}
     
 }

@@ -1,6 +1,5 @@
 package com.hello.world;
 
-import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,6 +35,10 @@ public class ViewController {
     
     @Resource(name = "proveDao")
     private ProveDao proveDao;
+    
+    @Autowired
+    private ViewService viewsvc;
+    
 
     // 게시판 목록
     @RequestMapping(value = "/bbs", method = RequestMethod.GET)
@@ -73,8 +77,8 @@ public class ViewController {
     }
 
     // 게시판 쓰기
-    @RequestMapping(value = "/write", method = RequestMethod.GET)
-    public String dispBbsWrite(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
+    @RequestMapping(value = "/writeSuggest", method = RequestMethod.GET)
+    public String dispBbsWriteSuggest(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
         logger.info("display view BBS write");
 
         if (idx > 0) {
@@ -82,7 +86,33 @@ public class ViewController {
             model.addAttribute("object", object);
         }
 
-        return "bbs/write";
+        return "bbs/writeMesure";
+    }
+    
+    // 게시판 쓰기
+    @RequestMapping(value = "/writeMesure", method = RequestMethod.GET)
+    public String dispBbsWriteMesure(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
+    	logger.info("display view BBS write");
+    	
+    	if (idx > 0) {
+    		BbsVo object = this.bbsDao.getSelectOne(idx);
+    		model.addAttribute("object", object);
+    	}
+    	
+    	return "bbs/writeMesure";
+    }
+    
+    // 게시판 쓰기
+    @RequestMapping(value = "/writeYesno", method = RequestMethod.GET)
+    public String dispBbsWriteYesno(@RequestParam(value="idx", defaultValue="0") int idx, Model model) {
+    	logger.info("display view BBS write");
+    	
+    	if (idx > 0) {
+    		BbsVo object = this.bbsDao.getSelectOne(idx);
+    		model.addAttribute("object", object);
+    	}
+    	
+    	return "bbs/writeYesno";
     }
     
     // 찬성
@@ -125,31 +155,26 @@ public class ViewController {
     	return "bbs/writeOpinion";
     }
 
-    @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public @ResponseBody String procBbsSave(@ModelAttribute("bbsVo") BbsVo bbsVo, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    @RequestMapping(value = "/saveMesure", method = RequestMethod.POST)
+    public @ResponseBody String procBbsSaveMesure(@ModelAttribute("bbsVo") BbsVo bbsVo, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         Integer idx = bbsVo.getIdx();
-
-        this.bbsDao.insert(bbsVo);
-        idx = bbsVo.getIdx();
-        
-        Enumeration<String> en = request.getParameterNames();
-        
-        ProveVo proveVo = new ProveVo();
-        proveVo.setIdx(idx);
-        while(en.hasMoreElements()){
-        	String nm = en.nextElement();
-        	if(nm.indexOf("prove_seq")>-1){
-        		String prove_seq = request.getParameter(nm);
-        		String num = nm.replaceAll("prove_seq", "");
-        		proveVo.setSeq(Integer.parseInt(prove_seq));
-        		proveVo.setNum(Integer.parseInt(num));
-        		proveDao.updateIdx(proveVo);
-        	}
-        }
+        bbsVo.setType_cd("100");
+        idx = viewsvc.txSaveBbs(bbsVo, request);
         
         redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
 
         return idx+"";
+    }
+    
+    @RequestMapping(value = "/saveYesno", method = RequestMethod.POST)
+    public @ResponseBody String procBbsSaveYesno(@ModelAttribute("bbsVo") BbsVo bbsVo, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    	Integer idx = bbsVo.getIdx();
+    	bbsVo.setType_cd("200");
+    	idx = viewsvc.txSaveBbs(bbsVo, request);
+    	
+    	redirectAttributes.addFlashAttribute("message", "추가되었습니다.");
+    	
+    	return idx+"";
     }
     
     @RequestMapping(value = "/saveProveTemp", method = RequestMethod.POST)

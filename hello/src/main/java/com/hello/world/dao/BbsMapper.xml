@@ -10,6 +10,7 @@
         <result property="reg_datetime"       column="reg_datetime" />
         <result property="relation_idx"       column="relation_idx" />
         <result property="opinion"       column="opinion" />
+        <result property="type_cd"       column="type_cd" />
     </resultMap>
 
     <select id="select" resultMap="bbsMap">
@@ -21,13 +22,14 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="idx">
-         INSERT INTO bbs ( user_name, subject, content, reg_datetime, relation_idx, opinion) VALUES (
+         INSERT INTO bbs ( user_name, subject, content, reg_datetime, relation_idx, opinion,type_cd) VALUES (
                 #{user_name}
               , #{subject}
               , #{content}
               , #{reg_datetime}
               , #{relation_idx}
               , #{opinion}
+              , #{type_cd}
          )
     </insert>
 
